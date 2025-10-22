@@ -35,13 +35,7 @@ These are the packages installed during the image build.
 
 ---
 
-## ⚙️ Winetricks Setup (`setup_wine.sh`)
-```bash
-winetricks -q corefonts           # Might be required
-winetricks -q sound=disabled
-winetricks -q --force vcrun2019   # Required
-winetricks -q --force dotnet48    # Required
-winetricks -q d3dcompiler_47
+## ⚙️ Setup
 
 # 1️⃣ Clone this repository
 git clone https://github.com/Pactor/SEDocker.git
