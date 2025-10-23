@@ -6,6 +6,29 @@ TORCH_DIR="$BASE_DIR/torch"
 INSTANCE_DIR="$TORCH_DIR/Instance"
 CFG_FILE="$INSTANCE_DIR/SpaceEngineers-Dedicated.cfg"
 ENV_FILE="/home/wine/scripts/torch_ports.env"
+SAVES_DIR="$INSTANCE_DIR/Saves"
+
+echo "=== Space Engineers Configuration ==="
+
+# --- Select savegame ---
+echo "🔍 Searching for valid savegames..."
+mapfile -t WORLDS < <(find "$SAVES_DIR" -maxdepth 1 -type d -exec test -f '{}/Sandbox_config.sbc' \; -print)
+
+if [ ${#WORLDS[@]} -eq 0 ]; then
+  echo "❌ No valid savegames found (no Sandbox_config.sbc files)."
+  exit 1
+fi
+
+echo "📂 Available savegames:"
+select WORLD in "${WORLDS[@]}"; do
+  if [ -n "$WORLD" ]; then
+    SANDBOX_FILE="$WORLD/Sandbox_config.sbc"
+    echo "✅ Selected world: $WORLD"
+    break
+  else
+    echo "Invalid choice, try again."
+  fi
+done
 
 # --- Load saved ports ---
 if [ -f "$ENV_FILE" ]; then
@@ -20,8 +43,6 @@ fi
 # ensure config dir exists
 mkdir -p "$INSTANCE_DIR"
 
-echo "=== Space Engineers Configuration ==="
-
 # Backup existing config
 cp "$CFG_FILE" "${CFG_FILE}.bak"
 
@@ -33,6 +54,10 @@ update_tag() {
         sed -i "s|<$tag>.*</$tag>|<$tag>$value</$tag>|" "$CFG_FILE"
     else
         sed -i "/<\/MyConfigDedicated>/i \  <$tag>$value</$tag>" "$CFG_FILE"
+    fi
+    # also update Sandbox_config.sbc
+    if grep -q "<$tag>" "$SANDBOX_FILE"; then
+        sed -i "s|<$tag>.*</$tag>|<$tag>$value</$tag>|" "$SANDBOX_FILE"
     fi
 }
 
@@ -66,6 +91,7 @@ ENABLE_WOLFS=$(ask "Enable wolfs (true/false)" "false")
 ENABLE_SPIDERS=$(ask "Enable spiders (true/false)" "false")
 
 EXPERIMENTAL=$(ask "Enable experimental mode (true/false)" "false")
+ENABLE_SCRIPTS=$(ask "Enable scripting (true/false)" "false")
 CROSSPLATFORM=$(ask "Enable cross-platform (true/false)" "false")
 IP_ADDR=$(ask "Server IP (0.0.0.0 for all)" "0.0.0.0")
 
@@ -89,6 +115,7 @@ update_tag "EnableDrones" "$ENABLE_DRONES"
 update_tag "EnableWolfs" "$ENABLE_WOLFS"
 update_tag "EnableSpiders" "$ENABLE_SPIDERS"
 update_tag "ExperimentalMode" "$EXPERIMENTAL"
+update_tag "EnableIngameScripts" "$ENABLE_SCRIPTS"
 update_tag "CrossPlatform" "$CROSSPLATFORM"
 update_tag "IP" "$IP_ADDR"
 update_tag "SteamPort" "$STEAM_PORT"
@@ -101,7 +128,15 @@ update_tag "ConsoleCompatibility" "false"
 
 echo
 echo "✅ Configuration complete!"
-echo "Your settings have been written to:"
-echo "  $CFG_FILE"
-echo "A backup was saved as:"
-echo "  ${CFG_FILE}.bak"
+echo "Dedicated server: $CFG_FILE (backup: ${CFG_FILE}.bak)"
+echo "World updated: $SANDBOX_FILE"
+
+
+read -p "Start Torch server now? (y/n): " START_NOW
+if [[ "$START_NOW" =~ ^[Yy]$ ]]; then
+  bash /home/wine/scripts/torch_run.sh
+else
+  echo
+  echo "⚙️ Setup complete. Start later with:"
+  echo "   bash /home/wine/scripts/torch_run.sh"
+fi

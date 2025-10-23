@@ -81,11 +81,5 @@ if [[ "$ADD_PLUGINS" =~ ^[Yy]$ ]]; then
   bash /home/wine/scripts/select_plugins.sh
 fi
 
-read -p "Start Torch server now? (y/n): " START_NOW
-if [[ "$START_NOW" =~ ^[Yy]$ ]]; then
-  bash /home/wine/scripts/torch_run.sh
-else
-  echo
-  echo "⚙️ Setup complete. Start later with:"
-  echo "   bash /home/wine/scripts/torch_run.sh"
-fi
+  echo "⚙️ Launching configuration tool..."
+  bash /home/wine/scripts/configure_game.sh
