@@ -1,22 +1,21 @@
 # 🚀 Space Engineers Dedicated Server with Torch Plugin Support
-
-A fully automated **Docker-based Space Engineers dedicated server** with full **Torch plugin** and **mod support**, running under Wine inside Ubuntu.  
-Includes auto-port mapping, plugin selection, mod configuration, and world setup.
+A fully automated Docker-based **Space Engineers dedicated server** featuring full **Torch plugin** and **mod support**, running under Wine inside Ubuntu. Includes automatic port configuration, plugin selection, mod setup, and world configuration scripts.
 
 ---
 
-### 🧱 Image Summary
-- **Final Image Size:** ~4.38 GB (with a brand-new world created)
+## 🧱 Image Summary
+- Base OS: Ubuntu (headless)
+- Server Manager: Torch
+- Final Image Size: ~4.4 GB (with a new world created)
+- Features: Plugin and mod support, auto-port mapping, configuration tools
 
 ---
 
-## 📦 Required Packages (`packages.txt`)
-These are the packages installed during the image build.
-
+## 📦 Installed Packages
 | Package | Required | Notes |
 |----------|-----------|-------|
-| software-properties-common | ❌ | Optional |
-| curl | ✅ | Required |
+| software-properties-common | ❌ | Optional helper for repos |
+| curl | ✅ | Required for downloads |
 | gnupg2 | ✅ | For secure repo setup |
 | wget | ✅ | Required |
 | net-tools | ✅ | Useful for debugging |
@@ -30,38 +29,38 @@ These are the packages installed during the image build.
 | wine64 | ✅ | Required |
 | wine32 | ✅ | Recommended |
 | winetricks | ✅ | Required |
-
-> 💡 You can slightly reduce the image size by omitting unneeded optional packages.
+> 💡 Optional packages can be removed to slightly reduce image size.
 
 ---
 
 ## ⚙️ Setup
+Clone this repository:  
+`git clone https://github.com/Pactor/SEDocker.git`  
+`cd SEDocker`
 
-# 1️⃣ Clone this repository
-git clone https://github.com/Pactor/SEDocker.git
-cd SEDocker
+Install and configure Docker for user access:  
+`sudo ./setup_docker_user.sh`  
+(Log out and back in if prompted.)
 
-# 2️⃣ Install and configure Docker for user access
-sudo ./setup_docker_user.sh
-# → Log out and back in if prompted
+Build the Docker image:  
+`./build.sh`
 
-# 3️⃣ Build the Docker image
-./build.sh
-# (no sudo required once Docker is configured)
+Configure the server ports (you’ll be asked for Game, Steam, and RCON ports):  
+Defaults → 27016 / 8766 / 8080
 
-# 4️⃣ Configure the server ports
-# You’ll be asked for Game, Steam, and RCON ports.
-# Defaults: 27016 / 8766 / 8080
+Enter the container:  
+`docker attach torch`  
+or, if not yet running:  
+`docker start -ai torch`
 
-# 5️⃣ Enter the container
-docker attach torch
-# or, if not yet running:
-docker start -ai torch
+Inside the container, create your world:  
+`./install_world.sh`  
+You’ll be prompted to choose a scenario, mods, and plugins (search by partial name such as “quan” or “sed”). After setup, you’ll be asked whether to configure the world now or later.
 
-# 6️⃣ Inside the container, create your world
-./install_world.sh
-# → Choose scenario, mods, plugins (search by partial name like “quan” or “sed”)
-# → Optionally start the server immediately
+To adjust gameplay and world settings later:  
+`./configure_game.sh`
 
-# 7️⃣ Start Torch manually later if desired
-/home/wine/scripts/torch_run.sh
+---
+
+Backups are automatically created before configuration changes. This image supports Torch plugins, Steam Workshop mods, and headless server operation — ideal for dedicated Linux hosts.
+
